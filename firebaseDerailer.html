@@ -16,7 +16,7 @@
 	
 </style>
       <script>
-      	var base = new Firebase("https://intense-inferno-7741.firebaseio.com")
+      	var base = new Firebase("https://intense-inferno-7741.firebaseio.com/Organizations/SRA/Countries")
 
       	function initialLoad() {
       		base.on("value",function(data){
@@ -25,9 +25,15 @@
       			data.forEach(function(i){
       				var b = 0
       				$("#structure").append("<div id='" + a + "' class='btn-primary'>" + i.key() + "</div>");
+                              if(!i.hasChildren()){
+                                    $("#" + a ).append("<div class='col-xs-offset-2 btn-success'>" + i.val() + "</div>");
+                              }
       				i.forEach(function(c){
       					var e = 0
       					$("#" + a).append("<div id='" + b + "" + a + "b' class='col-xs-offset-1 btn-success'>" + c.key() + "</div>");
+                                    if(!c.hasChildren()){
+                                          $("#" + b + "" + a + "b").append("<div  class='col-xs-offset-2 btn-info'>" + c.val() + "</div>");
+                                    }
       					c.forEach(function(d){
       						var g = 0
       						$("#" + b + "" + a + "b").append("<div id='" + e + "" + b + "" + a + "" + "c' class='col-xs-offset-2 btn-info'>" + d.key() + "</div>");
@@ -52,7 +58,21 @@
                                                             if(!l.hasChildren()){
                                                                   $("#" + k + h + "" + g + "" + e + "" + b + "" + a + "" + "f").append("<div class='col-xs-offset-1 btn-success'>" + l.val() + "</div>");
                                                             }
-                                                            
+                                                            l.forEach(function(n){
+                                                                  var o = 0;
+                                                                  $("#" + k + h + "" + g + "" + e + "" + b + "" + a + "" + "f").append("<div id='"+ m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g' class='col-xs-offset-1 btn-success'>" + n.key() + "</div>");
+                                                                  if(!n.hasChildren()){
+                                                                       $("#" + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div class='col-xs-offset-1 btn-info'>" + n.val() + "</div>"); 
+                                                                  }
+                                                                  n.forEach(function(q){
+                                                                        var p = 0
+                                                                        $("#" + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div id='" + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g' class='col-xs-offset-1 btn-info'>" + q.key() + "</div>"); 
+                                                                        if(!q.hasChildren()){
+                                                                              $("#" + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div class='col-xs-offset-1 btn-warning'>" + q.val() + "</div>");
+                                                                        }
+                                                                  })
+                                                                  m++
+                                                            })
                                                             k++
                                                       })
                                                       h++
