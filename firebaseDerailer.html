@@ -16,7 +16,7 @@
 	
 </style>
       <script>
-      	var base = new Firebase("https://intense-inferno-7741.firebaseio.com/Organizations/SRA/Countries")
+      	var base = new Firebase("https://intense-inferno-7741.firebaseio.com")
 
       	function initialLoad() {
       		base.on("value",function(data){
@@ -70,6 +70,16 @@
                                                                         if(!q.hasChildren()){
                                                                               $("#" + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div class='col-xs-offset-1 btn-warning'>" + q.val() + "</div>");
                                                                         }
+                                                                        q.forEach(function(r){
+                                                                              var s = 0;
+                                                                              $("#" + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div id='" + p + ""  + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g' class='col-xs-offset-1 btn-warning'>" + r.key() + "</div>");
+                                                                              if(!r.hasChildren()){
+                                                                                    $("#"  + p + ""  + o + m + ""  + k + "" + h + "" + g + "" + e + "" + b + "" + a + "" + "g").append("<div class='col-xs-offset-1 btn-danger'>" + r.val() + "</div>");
+                                                                              }
+                                                                              p++
+
+                                                                        })
+                                                                        o++
                                                                   })
                                                                   m++
                                                             })
