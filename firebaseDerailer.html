@@ -31,16 +31,34 @@
       					c.forEach(function(d){
       						var g = 0
       						$("#" + b + "" + a + "b").append("<div id='" + e + "" + b + "" + a + "" + "c' class='col-xs-offset-2 btn-info'>" + d.key() + "</div>");
-      						d.forEach(function(f){
-      							var h = 0
-      							if(d.numChildren() > 0){
-      								$("#" + e + "" + b + "" + a + "" + "c").append("<div id='" + g + "e' class='col-xs-offset-4 btn-warning'>" + f.key() + "</div>");
-      							} else{
-      								alert(JSON.stringify(d.val()))
-      								$("#" + e + "" + b + "" + a + "" + "c").append("<div class='col-xs-offset-4 btn-warning'>" + d.val() + "</div>");
-      							}
-      							g++	
-      						})
+                                          if(!d.hasChildren()){
+                                                $("#" + e + "" + b + "" + a + "" + "c").append("<div class='col-xs-offset-1 btn-warning'>" + d.val() + "</div>");
+                                          }
+                                          d.forEach(function(f){
+                                                var h = 0;
+                                                $("#" + e + "" + b + "" + a + "" + "c").append("<div id='" + g + "" + e + "" + b + "" + a + "" + "d' class='col-xs-offset-1 btn-warning'>" + f.key() + "</div>");
+                                                if(!f.hasChildren()){
+                                                      $("#" + g + "" + e + "" + b + "" + a + "" + "d").append("<div class='col-xs-offset-1 btn-danger'>" + f.val() + "</div>");
+                                                }
+                                                f.forEach(function(j){
+                                                      var k = 0;
+                                                      $("#" + g + "" + e + "" + b + "" + a + "" + "d").append("<div id='" + h + "" + g + "" + e + "" + b + "" + a + "" + "e' class='col-xs-offset-1 btn-danger'>" + j.key() + "</div>");
+                                                      if(!j.hasChildren()){
+                                                            $("#" + h + "" + g + "" + e + "" + b + "" + a + "" + "e").append("<div class='col-xs-offset-1 btn-primary'>" + j.val() + "</div>");
+                                                      }
+                                                      j.forEach(function(l){
+                                                            var m = 0;
+                                                            $("#" + h + "" + g + "" + e + "" + b + "" + a + "" + "e").append("<div id='" + k + h + "" + g + "" + e + "" + b + "" + a + "" + "f' class='col-xs-offset-1 btn-primary'>" + l.key() + "</div>");
+                                                            if(!l.hasChildren()){
+                                                                  $("#" + k + h + "" + g + "" + e + "" + b + "" + a + "" + "f").append("<div class='col-xs-offset-1 btn-success'>" + l.val() + "</div>");
+                                                            }
+                                                            
+                                                            k++
+                                                      })
+                                                      h++
+                                                })
+                                                g++
+                                          })
       						e++
       					})
       					b++
