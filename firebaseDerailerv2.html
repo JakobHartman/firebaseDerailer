@@ -1,0 +1,321 @@
+<html>
+<head>
+
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+<script src="https://cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<style type="text/css">
+
+#first{
+      cursor: pointer;
+      position: absolute;
+}
+
+#second{
+      position: fixed;
+      right: 0px;
+}
+
+#selected{
+      cursor: default;
+}
+
+#first,#second{
+      border: solid 20px;
+      -webkit-border-radius: 12px;
+      -moz-border-radius: 12px;
+      border-radius: 12px;
+}
+	
+</style>
+      <script>
+            var url = "https://intense-inferno-7741.firebaseio.com";
+            var moveClicks = 0;
+            var start;
+            var destination;
+            var copySlot;
+            var ref;
+            var newRef;
+      	var base = new Firebase(url);
+            var count = 0;
+
+
+      	function initialLoad() {
+                  base.on("value",function(data){
+                        $("#structure").html("");
+                        var structure = convert(data.val());
+                        $("#structure").append(structure);
+                        colorTier()
+
+                  })
+
+                  $('#structure').delegate('div', 'click', function() {
+
+
+                        var selectedText = $(this).contents().filter( function() {
+                              return this.nodeType === 3;
+                        }).text(); 
+                        
+                        var loop = $(this);
+                        var node;
+                        var string = url;
+                        var builder = new Array();
+                        while(node != "structure"){
+                              loop = loop.parent();
+                              builder.push(loop.contents().filter( function() {
+                              return this.nodeType === 3;
+                        }).text())
+                              node = loop.attr('id')
+                        }
+                        builder = builder.reverse();
+                        for(i in builder){
+                              string += "/" + builder[i];
+                        }
+                        string += "/" + selectedText;
+                        string = string.replace("\t","");
+                        string = string.replace("\n","")
+                        string = string.replace("/\t","")
+                        string = string.replace(" ","")
+
+                        $("#selected").val(string);
+                        if(moveClicks == 1){
+                              if(copySlot != undefined){
+                                    var base = new Firebase(string);
+                                    base.child(copySlot.key()).set(copySlot.val());
+                                    moveClicks = 0;
+                                    $("#message").text("");
+                              }else{
+                                    $("#message").text("Click move to finalize");
+                              }
+                              
+                        }
+
+                        return false;
+                  });
+
+                  $("#moveButton").on("click",function(){
+                        if(moveClicks == 0){
+                              if($("#selected").val() == ""){
+                                    $("#message").text("Nothing is selected")     
+                              }else{
+                                    $("#message").text("Select location to move reference")
+                                    start = $("#selected").val();
+                                    moveClicks = 1;
+                              }
+                        } else if(moveClicks == 1){
+                              destination = $("#selected").val();
+                              ref = new Firebase(start);
+                              newRef = new Firebase(destination);
+
+
+
+                              ref.once("value",function(data){
+                                    var key = data.key();
+                                    var collectedData = data.val();
+                                    newRef.child(key).set(collectedData);
+                                    ref.remove();
+                              });
+
+                              moveClicks = 0;
+                              $("#message").html("")
+                        }
+
+                  })
+
+                  $("#injectButton").on("click",function(){
+                        $("#specialBox").html("");
+                        $("#specialBox").append("<div class='form-group'><label class='col-xs-12'>JSON To Insert</label><textarea type='text' id='jsonInject' class='form-control col-xs-12' rows='8'/></textArea>'")
+                        $("#specialBox").append("<button id='jsonInjectButton' class='btn btn-primary'>Inject</button><button id='jsonInjectCancelButton' class=' btn btn-primary'>Cancel</button></div>");
+
+                        $("#jsonInjectButton").on("click",function(){
+                              if($("#jsonInject").val() == ""){
+                                    $("#message").text("Enter a JSON String")
+                                    
+                              }else if($("#selected").val() == ""){
+                                    $("#message").text("Select a reference")
+                              }else{
+                                    var jsonObject = JSON.parse($("#jsonInject").val());  
+                              }
+                        });
+
+                        $("#jsonInjectCancelButton").on("click",function(){
+                              $("#specialBox").html("") 
+                        });
+                  });
+
+                  $("#copyButton").on("click",function(){
+                        if(moveClicks == 0){
+                              if($("#selected").val() != ""){
+                                    var base = new Firebase($("#selected").val());
+                                    base.once("value",function(data){
+                                          copySlot = data;
+                                    })
+                                    $("#message").text("Node Copied, Select Destination")
+                                    moveClicks = 1;
+                              }
+
+                        } 
+                        
+                  });
+
+                  $("#downlaodButton").on("click",function(){
+                        var base = new Firebase(url);
+                        base.once("value",function(stuff){
+                              var obj = JSON.stringify(stuff.val());
+                              var blob = new Blob([obj], { type: 'text/json' }); //new way
+                              var jsonUrl = URL.createObjectURL(blob);
+                              var filename = "data.json";
+                              
+                              $('<a class="text-center col-xs-12 btn btn-primary" id="downloadJsonButton">Download JSON</a>').appendTo('#specialBox');
+                              $("#downloadJsonButton").attr({'download': filename,'href': jsonUrl});
+                        })
+                        
+                  })
+                  
+                 
+      	}
+
+
+            function convert(obj){
+                  var divs = [];
+                  for (var key in obj) {
+                        if (obj.hasOwnProperty(key)){
+                              var div = document.createElement('div');
+                              div = $(div);
+                              div.text(key)
+                              var child = convertElement(obj[key]);
+                              div.append(child);
+                              divs.push(div);
+                        }
+                  }
+                  return divs;
+            }
+
+            function convertElement(element){
+                  switch (typeof(element)){
+                        case 'object':
+                              return convert(element);
+                              break;
+                        case 'array':
+                              return convert(element);
+                              break;
+                        case 'string':
+                              return divify(element);
+                              break;
+                        case 'number':
+                              return divify(element);
+                              break;
+                        case 'boolean':
+                              return divify(element);
+                  }
+            }     
+
+            function divify(element){
+                  var div = document.createElement('div');
+                  div = $(div)
+                  div.text(element);
+                  return div;
+            }
+
+            function colorTier(){
+                  var i = 0;
+                  var start = $("#structure");
+                  var colors = ["btn-primary","btn-success","btn-info","btn-warning","btn-danger"]
+                  var f = 0;
+                  var position = start.children()
+                  position.find("*").addClass("col-xs-offset-1")
+                  while (i < getDepth()){
+                        position.addClass(colors[f])
+                        f++;
+                        position = position.children();
+                        if(f == 5){
+                              f = 0
+                        }
+                        i++;
+                  }
+            }
+
+            function getRandomColor(v) {
+                var letters = '123456789ABCDE'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += letters[Math.floor(Math.random() * v)];
+                }
+                if(color == "#000000" || color == "#FFFFFF"){
+                  color = "#434371"
+                }
+                return color;
+            }
+
+            function getDepth(){
+                  var all = $('#structure *:not(:has("*"))'), maxDepth=0, deepest = []; 
+                  all.each( function(){ 
+                        var depth = $(this).parents().length||0; 
+                        if(depth>maxDepth){ 
+                              deepest = [this]; 
+                              maxDepth = depth; 
+                        }
+                        else if(depth==maxDepth){
+                              deepest.push(this); 
+                        }
+                  });
+                  return maxDepth;
+            }
+
+      	
+
+      </script>
+</head>
+<body onload="initialLoad()">
+      <div id="first" class="col-xs-8">
+		<div id="structure" class="row">
+		</div>
+      </div>
+      <div id="second" class="col-xs-4">
+            <nav class="navbar navbar-inverse">
+                  <div class="container-fluid">
+                      <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                          <span class="sr-only">Toggle navigation</span>
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="#">Firebase Derailer</a>
+                      </div>
+                      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                      </div><!-- /.navbar-collapse -->
+                  </div>
+            </nav>
+            <div class="form-group">
+            <label>Selected</label>
+                  <textarea class="form-control" type="" id="selected" readonly="readonly" rows="10"></textarea>
+            </div>
+            <div class="container-fluid">
+                  <img src="swap.png" alt="Move" title="Move" id="moveButton" class="col-xs-3" />
+                  <img src="add.png" alt="Add" title="Add" id="addButton" class="col-xs-3" />
+                  <img src="edit.png" alt="Edit" title="Edit" id="editButton" class="col-xs-3" />
+                  <img src="inject.png" alt="Inject" title="Inject" id="injectButton" class="col-xs-3" />
+                  <img src="copy.png" alt="Copy" title="Copy" id="copyButton" class="col-xs-3" />
+                  <img src="remove.png" alt="Remove" title="Remove" id="removeButton" class="col-xs-3" />
+                  <img src="download.png" alt="Download" title="Download" id="downlaodButton" class="col-xs-3" />
+                  <div class="col-xs-12 text-center" id="message">
+                  </div>
+            </div>
+            <div id="specialBox">
+                  
+            </div>
+      </div>
+	
+</body>
+
+</html>
