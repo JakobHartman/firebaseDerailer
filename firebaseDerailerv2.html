@@ -37,7 +37,7 @@
 	
 </style>
       <script>
-            var url = "https://testrbdc.firebaseio.com/organizations/";
+            var url = "https://testrbdc.firebaseio.com/organizations";
             var moveClicks = 0;
             var start;
             var destination;
@@ -76,13 +76,14 @@
                               node = loop.attr('id')
                         }
                         builder = builder.reverse();
+                        builder.shift()
                         for(i in builder){
                               string += "/" + builder[i];
                         }
                         string += "/" + selectedText;
                         string = string.replace("\t","");
                         string = string.replace("\n","")
-                        string = string.replace("/\t","")
+                        string = string.replace("/\t/g","")
                         string = string.replace(" ","")
 
                         $("#selected").val(string);
@@ -103,13 +104,16 @@
 
                   $("#structure").delegate('div','dblclick',function(){
                         var store = $("#selected").val();
-                        $(this).first().append("<input class='col-xs-offset-1' type='text' id='changeName' style='color:black'><button class='btn-primary'>Change</button>");
+                        $(this).first().prepend("<input class='col-xs-offset-1' type='text' id='changeName' style='color:black'><button class='btn-primary' id='changeButton'>Change</button>");
                         setTimeout(function(){
                               $("#changeName").focus();
                               var name = store.split("/")
                               $("#changeName").val(name[name.length - 1])
+                              $("#changeButton").delegate($(this),"click",function(){
+                                    change()
+                                    return false
+                              })
                         }, 1);
-                        
 
                         return false
                   })
@@ -200,6 +204,17 @@
                   
                  
       	}
+
+            function change(){
+                  var base = new Firebase($("#selected").val())
+                  base.on("value",function(data){
+                        var info = data.val()
+                        var parent = base.parent()
+                        parent.child($("#changeName").val()).set(info)
+                        base.remove()
+                  })
+                  
+            }
 
 
             function convert(obj){
@@ -321,7 +336,6 @@
             <div class="container-fluid">
                   <img src="swap.png" alt="Move" title="Move" id="moveButton" class="col-xs-3" />
                   <img src="add.png" alt="Add" title="Add" id="addButton" class="col-xs-3" />
-                  <img src="edit.png" alt="Edit" title="Edit" id="editButton" class="col-xs-3" />
                   <img src="inject.png" alt="Inject" title="Inject" id="injectButton" class="col-xs-3" />
                   <img src="copy.png" alt="Copy" title="Copy" id="copyButton" class="col-xs-3" />
                   <img src="remove.png" alt="Remove" title="Remove" id="removeButton" class="col-xs-3" />
