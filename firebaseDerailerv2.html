@@ -37,7 +37,7 @@
 	
 </style>
       <script>
-            var url = "https://intense-inferno-7741.firebaseio.com";
+            var url = "https://testrbdc.firebaseio.com/organizations/";
             var moveClicks = 0;
             var start;
             var destination;
@@ -100,6 +100,19 @@
 
                         return false;
                   });
+
+                  $("#structure").delegate('div','dblclick',function(){
+                        var store = $("#selected").val();
+                        $(this).first().append("<input class='col-xs-offset-1' type='text' id='changeName' style='color:black'><button class='btn-primary'>Change</button>");
+                        setTimeout(function(){
+                              $("#changeName").focus();
+                              var name = store.split("/")
+                              $("#changeName").val(name[name.length - 1])
+                        }, 1);
+                        
+
+                        return false
+                  })
 
                   $("#moveButton").on("click",function(){
                         if(moveClicks == 0){
@@ -178,6 +191,11 @@
                               $("#downloadJsonButton").attr({'download': filename,'href': jsonUrl});
                         })
                         
+                  })
+
+                  $("#removeButton").on("click",function(){
+                        var base = new Firebase($("#selected").val());
+                        base.remove()
                   })
                   
                  
